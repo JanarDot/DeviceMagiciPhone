@@ -438,10 +438,20 @@
       background: var(--gold-glow);
     }
 
-    /* Spell card — no status row, just spell name + counter */
-    .spell-card {
-      padding-top: 28px;
-      padding-bottom: 28px;
+    /* Spell counter — small badge, top-right area of casting screen */
+    .counter-wrap {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0 4px;
+      min-height: 28px;
+    }
+
+    .spell-counter {
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      font-weight: 300;
+      color: var(--gold-dim);
+      letter-spacing: 0.06em;
     }
 
     /* Scroll hint */
@@ -626,14 +636,14 @@
   ───────────────────────────────────────────────────────────────────────── -->
   <section id="casting" hidden>
 
-    <!-- Hidden status elements — updated by app.js, not displayed -->
+    <!-- Hidden elements updated by app.js — not displayed -->
     <span id="status-emoji" style="display:none"></span>
     <span id="status-text"  style="display:none"></span>
+    <span id="last-spell"   style="display:none"></span>
 
-    <!-- Spell display -->
-    <div class="card spell-card">
-      <div id="last-spell"></div>
-      <div id="spell-count"></div>
+    <!-- Spell counter — small badge, animates on each cast -->
+    <div class="counter-wrap">
+      <span id="spell-count" class="spell-counter"></span>
     </div>
 
     <!-- Scroll hint -->

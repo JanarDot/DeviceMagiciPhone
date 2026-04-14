@@ -18,6 +18,7 @@ class AudioEngine {
 
   // Creates the AudioContext and gain chain.
   // MUST be called synchronously inside a user tap handler (iOS Safari requirement).
+  // Also plays a one-sample silent buffer — required to fully unlock iOS audio.
   unlock() {
     if (this.ctx) return; // already unlocked
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -34,20 +35,39 @@ class AudioEngine {
     // Wire the chain: boostGain → masterGain → speakers
     this.boostGain.connect(this.masterGain);
     this.masterGain.connect(this.ctx.destination);
+
+    // iOS requires actual audio output to happen in the tap handler to fully unlock.
+    // Playing a silent 1-sample buffer satisfies this requirement without making noise.
+    try {
+      const silentBuf = this.ctx.createBuffer(1, 1, 22050);
+      const silentSrc = this.ctx.createBufferSource();
+      silentSrc.buffer = silentBuf;
+      silentSrc.connect(this.ctx.destination);
+      silentSrc.start(0);
+    } catch (_) {}
   }
 
   // Fetches and decodes all audio files in parallel, storing them in the cache.
-  // Mirrors the lazy caching in audioFile(for:) in SpellPlayer.swift,
-  // except we load everything upfront so the first gesture fires instantly.
   // filenames: array of strings, e.g. ['abracadabra-female.mp3', ...]
   async preload(filenames) {
+    // Ensure the AudioContext is running before decoding.
+    // iOS suspends it after async operations (e.g. the permission dialog).
+    // decodeAudioData silently stalls on a suspended context.
+    if (this.ctx.state !== 'running') {
+      await this.ctx.resume();
+    }
+
     const promises = filenames.map(async (filename) => {
       if (this.buffers.has(filename)) return; // already cached
       try {
         const response = await fetch(`audio/${filename}`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await this.ctx.decodeAudioData(arrayBuffer);
+        // Use the callback form of decodeAudioData — the Promise form has known
+        // stall bugs on older iOS Safari versions.
+        const audioBuffer = await new Promise((resolve, reject) => {
+          this.ctx.decodeAudioData(arrayBuffer, resolve, reject);
+        });
         this.buffers.set(filename, audioBuffer);
       } catch (e) {
         console.warn(`DeviceMagic: could not load audio/${filename}`, e);
@@ -62,8 +82,7 @@ class AudioEngine {
     if (!this.ctx || !this.buffers.has(filename)) return;
 
     // Resume context if suspended — must be awaited so audio actually starts.
-    // iOS suspends the context after async operations (e.g. permission dialog).
-    if (this.ctx.state === 'suspended') {
+    if (this.ctx.state !== 'running') {
       await this.ctx.resume();
     }
 

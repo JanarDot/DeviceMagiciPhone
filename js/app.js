@@ -185,16 +185,19 @@ function _updateStatusUI() {
 
 function _updateSpellCounter() {
   const n = state.spellCount;
-  _el('spell-count').textContent = n > 0
-    ? `${n} spell${n === 1 ? '' : 's'} cast`
-    : '';
+  const el = _el('spell-count');
+  if (n > 0) {
+    el.textContent = `#${n}`;
+    el.classList.remove('spell-pop');
+    void el.offsetWidth;
+    el.classList.add('spell-pop');
+  } else {
+    el.textContent = '';
+  }
 }
 
 function _showSpellName(name) {
+  // last-spell is hidden visually; keep the update for any future use
   const el = _el('last-spell');
-  el.textContent = name;
-  // Restart the pop-in animation by removing and re-adding the class
-  el.classList.remove('spell-pop');
-  void el.offsetWidth; // force a reflow so the browser notices the class was removed
-  el.classList.add('spell-pop');
+  if (el) el.textContent = name;
 }

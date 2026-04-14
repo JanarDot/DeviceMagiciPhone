@@ -601,7 +601,133 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════════════
-       DESKTOP — graceful scale (low-priority)
+       DEVICE VIEWS — show only the matching platform section
+    ═══════════════════════════════════════════════════════════════════════ */
+
+    /* All views hidden by default */
+    .view-ios,
+    .view-android,
+    .view-mac,
+    .view-desktop {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    /* Reveal the matching view */
+    [data-device="ios"]     .view-ios     { display: flex; }
+    [data-device="android"] .view-android { display: flex; }
+    [data-device="mac"]     .view-mac     { display: flex; }
+    [data-device="desktop"] .view-desktop { display: flex; }
+
+    /* ── Shared download button ─────────────────────────────────────────── */
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 46px;
+      padding: 17px 42px;
+      background: var(--gold);
+      border: none;
+      border-radius: 2px;
+      color: #0f0d0a;
+      font-family: var(--font-ui);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.22s, box-shadow 0.22s;
+      animation: fadeUp 0.9s ease both;
+      animation-delay: 0.78s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-download:hover,
+    .btn-download:active {
+      background: var(--gold-bright);
+      box-shadow: 0 0 28px rgba(196, 151, 63, 0.28);
+    }
+
+    /* ── Secondary / browser link ───────────────────────────────────────── */
+    .btn-secondary {
+      margin-top: 18px;
+      background: transparent;
+      border: 1px solid var(--gold-border);
+      color: var(--gold-dim);
+      padding: 12px 32px;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      animation-delay: 0.94s;
+    }
+
+    .btn-secondary:hover,
+    .btn-secondary:active {
+      background: var(--gold-glow);
+      border-color: var(--gold-dim);
+      color: var(--gold);
+      box-shadow: none;
+    }
+
+    /* ── Platform note (Android) ────────────────────────────────────────── */
+    .platform-note {
+      margin-top: 20px;
+      font-size: 0.67rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      line-height: 1.6;
+      text-align: center;
+      max-width: 240px;
+      animation: fadeIn 0.9s ease both;
+      animation-delay: 1.1s;
+    }
+
+    /* ── Desktop view ───────────────────────────────────────────────────── */
+    .desktop-message {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: clamp(1.15rem, 4vw, 1.4rem);
+      color: var(--text-dim);
+      text-align: center;
+      line-height: 1.5;
+      max-width: 280px;
+      margin-top: 24px;
+      animation: fadeUp 0.9s ease both;
+      animation-delay: 0.42s;
+    }
+
+    .qr-wrap {
+      margin-top: 36px;
+      padding: 18px;
+      border: 1px solid var(--gold-border);
+      border-radius: 4px;
+      background: var(--bg-card);
+      animation: fadeIn 0.9s ease both;
+      animation-delay: 0.7s;
+    }
+
+    .qr-wrap img {
+      display: block;
+      width: 160px;
+      height: 160px;
+    }
+
+    .qr-label {
+      margin-top: 14px;
+      font-size: 0.64rem;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: center;
+      animation: fadeIn 0.9s ease both;
+      animation-delay: 0.85s;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════
+       RESPONSIVE
     ═══════════════════════════════════════════════════════════════════════ */
 
     @media (min-width: 600px) {
@@ -625,7 +751,9 @@
        LANDING
   ───────────────────────────────────────────────────────────────────────── -->
   <section id="landing">
-    <div class="landing-inner">
+
+    <!-- ── iOS ─────────────────────────────────────────────────────────── -->
+    <div class="view-ios">
 
       <p class="ornament">✦ &nbsp; ✦ &nbsp; ✦</p>
 
@@ -638,6 +766,78 @@
       <button id="activate-btn" class="btn-activate">Cast a Spell</button>
 
       <p class="landing-sub">Turn up your volume &nbsp;·&nbsp; Allow motion access when prompted</p>
+
+    </div>
+
+    <!-- ── Android ──────────────────────────────────────────────────────── -->
+    <div class="view-android">
+
+      <p class="ornament">✦ &nbsp; ✦ &nbsp; ✦</p>
+
+      <h1 class="landing-headline">Device<br>Magic</h1>
+
+      <div class="gold-rule"></div>
+
+      <p class="landing-tagline">Flick your wrist.<br>Cast a spell.</p>
+
+      <a class="btn-download" href="downloads/device-magic.apk" download="device-magic.apk">
+        Download for Android
+      </a>
+
+      <a class="btn-download btn-secondary" href="#" id="android-browser-btn">
+        Try in browser instead
+      </a>
+
+      <p class="platform-note">
+        Direct install · no app store required<br>
+        Runs in the background with screen off
+      </p>
+
+    </div>
+
+    <!-- ── Mac ──────────────────────────────────────────────────────────── -->
+    <div class="view-mac">
+
+      <p class="ornament">✦ &nbsp; ✦ &nbsp; ✦</p>
+
+      <h1 class="landing-headline">Device<br>Magic</h1>
+
+      <div class="gold-rule"></div>
+
+      <p class="landing-tagline">Flick your wrist.<br>Cast a spell.</p>
+
+      <a class="btn-download" href="downloads/device-magic-mac.zip" download="device-magic-mac.zip">
+        Download for Mac
+      </a>
+
+      <p class="platform-note">
+        Unzip and move to Applications<br>
+        Runs silently in your menu bar
+      </p>
+
+    </div>
+
+    <!-- ── Desktop (non-Mac) ────────────────────────────────────────────── -->
+    <div class="view-desktop">
+
+      <p class="ornament">✦ &nbsp; ✦ &nbsp; ✦</p>
+
+      <h1 class="landing-headline">Device<br>Magic</h1>
+
+      <div class="gold-rule"></div>
+
+      <p class="desktop-message">This one works best on a phone.<br>Scan to open it there.</p>
+
+      <div class="qr-wrap">
+        <img
+          src="https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=https%3A%2F%2Fjanardot.github.io%2FDeviceMagiciPhone%2F&bgcolor=161310&color=c4973f&format=svg&margin=2"
+          alt="QR code — scan to open Device Magic on your phone"
+          width="160"
+          height="160"
+        />
+      </div>
+
+      <p class="qr-label">janardot.github.io/DeviceMagiciPhone</p>
 
     </div>
 
@@ -738,6 +938,20 @@
       if (hint) hint.classList.add('hidden');
       window.removeEventListener('scroll', hideHint);
     }, { passive: true });
+
+    // Android "Try in browser" — routes to the same flow as the iOS activate button
+    var androidBrowserBtn = document.getElementById('android-browser-btn');
+    if (androidBrowserBtn) {
+      androidBrowserBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var activateBtn = document.getElementById('activate-btn');
+        // Make iOS view briefly visible so app.js can attach to #activate-btn,
+        // then programmatically trigger it
+        if (activateBtn) {
+          activateBtn.click();
+        }
+      });
+    }
   </script>
   <script src="js/spells.js"></script>
   <script src="js/motion.js"></script>

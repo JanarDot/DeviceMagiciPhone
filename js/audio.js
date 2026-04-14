@@ -1,121 +1,84 @@
-// Audio engine — mirrors SpellPlayer.swift from the iOS app.
+// Audio engine — uses HTMLAudioElement for reliable iOS Safari playback.
 //
-// Signal chain (mirrors iOS): source → boostGain → masterGain → destination
-//   boostGain.gain = 5.0  ≈  eqNode.globalGain = 14dB  (10^(14/20) = 5.012)
-//   masterGain.gain = 0–1  ≈  engine.mainMixerNode.outputVolume
+// Web Audio API (AudioContext + decodeAudioData) has a known iOS bug where
+// decodeAudioData silently hangs forever when the context is suspended.
+// The context gets suspended by the async DeviceMotionEvent.requestPermission()
+// dialog, and cannot always be resumed outside a user gesture.
 //
-// iOS Safari blocks all audio until a user gesture has occurred.
-// unlock() must be called directly inside a tap handler — not in a timeout or promise.
+// HTMLAudioElement.play() is natively supported on iOS without any of this,
+// and once unlocked by a single tap it can be called programmatically forever —
+// including from accelerometer events and the test button.
 
 class AudioEngine {
   constructor() {
-    this.ctx          = null;           // AudioContext — null until unlock() is called
-    this.buffers      = new Map();      // filename → AudioBuffer (mirrors cachedFiles in iOS)
-    this.masterGain   = null;           // volume control (0–1)
-    this.boostGain    = null;           // +14dB boost applied to every spell
-    this.currentSource = null;          // the currently playing AudioBufferSourceNode
+    this.elements = new Map();   // filename → HTMLAudioElement
+    this.volume   = 1.0;
+    this.current  = null;        // the currently playing <audio> element
+    this._unlocked = false;
   }
 
-  // Creates the AudioContext and gain chain.
-  // MUST be called synchronously inside a user tap handler (iOS Safari requirement).
-  // Also plays a one-sample silent buffer — required to fully unlock iOS audio.
+  // Unlocks iOS HTML5 audio by playing a zero-volume silent sound.
+  // MUST be called synchronously inside a user tap handler.
+  // After this, el.play() can be called from any context (accelerometer, timers, etc.)
   unlock() {
-    if (this.ctx) return; // already unlocked
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    this.ctx = new AudioCtx();
+    if (this._unlocked) return;
+    this._unlocked = true;
 
-    // Boost gain: +14dB equivalent — mirrors eqNode.globalGain = 14 in SpellPlayer.swift
-    this.boostGain = this.ctx.createGain();
-    this.boostGain.gain.value = 5.0;
-
-    // Master gain: volume control — mirrors mainMixerNode.outputVolume
-    this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.value = 1.0;
-
-    // Wire the chain: boostGain → masterGain → speakers
-    this.boostGain.connect(this.masterGain);
-    this.masterGain.connect(this.ctx.destination);
-
-    // iOS requires actual audio output to happen in the tap handler to fully unlock.
-    // Playing a silent 1-sample buffer satisfies this requirement without making noise.
-    try {
-      const silentBuf = this.ctx.createBuffer(1, 1, 22050);
-      const silentSrc = this.ctx.createBufferSource();
-      silentSrc.buffer = silentBuf;
-      silentSrc.connect(this.ctx.destination);
-      silentSrc.start(0);
-    } catch (_) {}
+    // Minimal valid WAV (44 bytes, 1 channel, 0 samples) as a data URI.
+    // Playing it in the tap handler is what satisfies iOS's "user gesture" requirement.
+    const el = document.createElement('audio');
+    el.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+    el.volume = 0;
+    el.play().catch(() => {});
   }
 
-  // Fetches and decodes all audio files in parallel, storing them in the cache.
-  // filenames: array of strings, e.g. ['abracadabra-female.mp3', ...]
+  // Creates <audio> elements for every spell file.
+  // Completes immediately — no decoding, no hanging.
+  // iOS will load the actual audio on first play() call.
   async preload(filenames) {
-    // Ensure the AudioContext is running before decoding.
-    // iOS suspends it after async operations (e.g. the permission dialog).
-    // decodeAudioData silently stalls on a suspended context.
-    if (this.ctx.state !== 'running') {
-      await this.ctx.resume();
-    }
-
-    const promises = filenames.map(async (filename) => {
-      if (this.buffers.has(filename)) return; // already cached
-      try {
-        const response = await fetch(`audio/${filename}`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const arrayBuffer = await response.arrayBuffer();
-        // Use the callback form of decodeAudioData — the Promise form has known
-        // stall bugs on older iOS Safari versions.
-        const audioBuffer = await new Promise((resolve, reject) => {
-          this.ctx.decodeAudioData(arrayBuffer, resolve, reject);
-        });
-        this.buffers.set(filename, audioBuffer);
-      } catch (e) {
-        console.warn(`DeviceMagic: could not load audio/${filename}`, e);
-      }
+    filenames.forEach(filename => {
+      if (this.elements.has(filename)) return;
+      const el = document.createElement('audio');
+      el.src      = `audio/${filename}`;
+      el.preload  = 'auto';
+      el.volume   = this.volume;
+      this.elements.set(filename, el);
     });
-    await Promise.all(promises);
+    // Brief yield so the caller can update UI before returning
+    await new Promise(r => setTimeout(r, 80));
   }
 
-  // Plays a spell audio file.
-  // Stops any currently playing spell first — mirrors playerNode.stop() in SpellPlayer.swift.
+  // Plays a spell. Stops any currently playing spell first.
   async play(filename) {
-    if (!this.ctx || !this.buffers.has(filename)) return;
+    const el = this.elements.get(filename);
+    if (!el) return;
 
-    // Resume context if suspended — must be awaited so audio actually starts.
-    if (this.ctx.state !== 'running') {
-      await this.ctx.resume();
+    // Stop the current spell
+    if (this.current) {
+      try {
+        this.current.pause();
+        this.current.currentTime = 0;
+      } catch (_) {}
     }
 
-    // Stop the current spell — mirrors playerNode.stop() before scheduleFile()
-    if (this.currentSource) {
-      try { this.currentSource.stop(); } catch (_) {}
-      this.currentSource.disconnect();
-      this.currentSource = null;
+    el.volume      = this.volume;
+    el.currentTime = 0;
+    try {
+      await el.play();
+      this.current = el;
+    } catch (e) {
+      console.warn('DeviceMagic: play failed for', filename, e);
     }
-
-    // Create a new source node and connect it through the gain chain
-    const source = this.ctx.createBufferSource();
-    source.buffer = this.buffers.get(filename);
-    source.connect(this.boostGain);
-    source.start(0);
-    this.currentSource = source;
-
-    // Clean up reference when playback finishes naturally
-    source.onended = () => {
-      if (this.currentSource === source) this.currentSource = null;
-    };
   }
 
-  // Sets the master volume (0.0 – 1.0).
-  // Mirrors: engine.mainMixerNode.outputVolume = volume in SpellPlayer.swift
+  // Sets master volume (0.0 – 1.0). Applied to all elements immediately.
   setVolume(v) {
-    if (this.masterGain) {
-      this.masterGain.gain.value = Math.max(0, Math.min(1, v));
-    }
+    this.volume = Math.max(0, Math.min(1, v));
+    this.elements.forEach(el => { el.volume = this.volume; });
   }
 
-  // Returns true if the engine has been unlocked and files are loaded.
+  // True once unlock() has been called and elements are registered.
   get isReady() {
-    return this.ctx !== null && this.buffers.size > 0;
+    return this._unlocked && this.elements.size > 0;
   }
 }

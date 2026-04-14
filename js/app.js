@@ -81,13 +81,7 @@ async function handleActivate() {
     return;
   }
 
-  // Step 2b: iOS suspends the AudioContext during the async permission dialog.
-  // Re-resume it now that we're back in a resolved state.
-  if (audio.ctx && audio.ctx.state === 'suspended') {
-    await audio.ctx.resume();
-  }
-
-  // Step 3: Preload all 40 audio files into memory
+  // Step 3: Register all 40 audio elements (completes in ~80ms)
   btn.textContent = 'Loading spells…';
   await audio.preload(getAllAudioFilenames());
 
@@ -165,7 +159,7 @@ function handleVolumeChange() {
 // This re-requests it so the screen stays on when the user returns.
 
 document.addEventListener('visibilitychange', async () => {
-  if (document.visibilityState === 'visible' && state.isActive && audio.isReady) {
+  if (document.visibilityState === 'visible' && audio.isReady) {
     try {
       wakeLock = await navigator.wakeLock.request('screen');
     } catch (_) {}

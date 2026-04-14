@@ -791,36 +791,39 @@
        FOOTER — landing-specific layout
     ═══════════════════════════════════════════════════════════════════════ */
 
-    #landing footer {
+    #landing footer,
+    #casting footer {
       align-items: stretch;
+      text-align: left;
       padding: 20px 24px max(24px, env(safe-area-inset-bottom));
       gap: 14px;
     }
 
-    /* Credits row — love text right, copyright left, matching Android app */
+    /* Credits row — © left, love text right, bottom-aligned — mirrors Android app */
     .footer-credits {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-between;
       width: 100%;
-      max-width: 540px;
-      gap: 12px;
+      gap: 8px;
     }
 
     .footer-love {
-      font-size: 0.6rem !important;
-      line-height: 1.5 !important;
+      font-size: 0.62rem !important;
+      line-height: 1.55 !important;
       max-width: none !important;
       text-align: right;
+      flex: 1;
     }
 
     .footer-copy {
-      font-size: 0.6rem;
+      font-size: 0.62rem;
       white-space: nowrap;
     }
 
     .footer-bottom {
-      gap: 10px;
+      gap: 8px;
+      flex-shrink: 0;
     }
 
     /* ── FAQ accordion ──────────────────────────────────────────────────── */
@@ -1119,14 +1122,16 @@
     <p class="casting-hint">Flick your wrist like a wand &nbsp;✦</p>
 
     <footer>
-      <p class="footer-love">made with ♥ and open sourced 4 everyone to have more magic in their life!</p>
-      <div class="footer-bottom">
-        <span class="footer-copy">© 2026 Clandestina Labs</span>
-        <a class="footer-x" href="https://x.com/Clandestinalabs" target="_blank" rel="noopener" aria-label="Clandestina Labs on X">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.91-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-          </svg>
-        </a>
+      <div class="footer-credits">
+        <div class="footer-bottom">
+          <span class="footer-copy">© Clandestina Labs 2026</span>
+          <a class="footer-x" href="https://x.com/Clandestinalabs" target="_blank" rel="noopener" aria-label="Clandestina Labs on X">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.91-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </a>
+        </div>
+        <p class="footer-love">made with &lt;3 and open sourced<br>4 everyone to have more magic in their life!!</p>
       </div>
     </footer>
 

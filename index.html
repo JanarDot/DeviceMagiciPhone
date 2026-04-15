@@ -867,6 +867,10 @@
       animation-delay: 1.12s;
     }
 
+    /* ── Mac-only elements — hidden on all other devices ────────────────── */
+    .mac-only { display: none; }
+    [data-device="mac"] .mac-only { display: block; }
+
     /* ── Mac install note (Gatekeeper workaround) ───────────────────────── */
     .install-note {
       margin-top: 20px;
@@ -1224,21 +1228,6 @@
         Runs silently in your menu bar &nbsp;·&nbsp; macOS 14+
       </p>
 
-      <div class="install-note">
-        <p class="install-note-title">Blocked by macOS?</p>
-        <p class="install-note-body">
-          Apple blocks unverified apps by default. Paste this in Terminal to install without the warning:
-        </p>
-        <div class="install-cmd-wrap">
-          <code class="install-cmd" id="install-cmd">curl -fsSL https://janardot.github.io/DeviceMagic/downloads/install.sh | bash</code>
-          <button class="install-copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('install-cmd').textContent).then(()=>{this.textContent='Copied';setTimeout(()=>{this.textContent='Copy'},1800)})">Copy</button>
-        </div>
-        <p class="install-note-alt">
-          Or: open the downloaded app, click Done, then go to<br>
-          <strong>System Settings → Privacy &amp; Security → Open Anyway</strong>
-        </p>
-      </div>
-
       <p class="platform-also">
         Also on
         <a href="https://janardot.github.io/DeviceMagic/" class="platform-also-link">iPhone &amp; Android</a>
@@ -1309,6 +1298,22 @@
           <p class="faq-a">Please don't sue me. We all deserve more MAGIC in our lives! This is not for commercial use, it's just meant to spread some fun.</p>
         </div>
       </details>
+
+      <!-- ── macOS install help — only shown on Mac ──────────────────────── -->
+      <div class="install-note mac-only">
+        <p class="install-note-title">Blocked by macOS?</p>
+        <p class="install-note-body">
+          Apple blocks unverified apps by default. Paste this in Terminal to install without the warning:
+        </p>
+        <div class="install-cmd-wrap">
+          <code class="install-cmd" id="install-cmd">curl -fsSL https://janardot.github.io/DeviceMagic/downloads/install.sh | bash</code>
+          <button class="install-copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('install-cmd').textContent).then(()=>{this.textContent='Copied';setTimeout(()=>{this.textContent='Copy'},1800)})">Copy</button>
+        </div>
+        <p class="install-note-alt">
+          Or: open the downloaded app, click Done, then go to<br>
+          <strong>System Settings → Privacy &amp; Security → Open Anyway</strong>
+        </p>
+      </div>
 
       <!-- ── Credits — © left, love text right ────────────────────────── -->
       <div class="footer-credits">

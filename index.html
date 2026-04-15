@@ -1149,19 +1149,8 @@
       window.removeEventListener('scroll', hideHint);
     }, { passive: true });
 
-    // Android "try in browser" — triggers the full activation flow
-    // app.js listens on #activate-btn; we dispatch a real click event so it fires
-    // even though the button is inside the hidden iOS view (display:none doesn't
-    // block programmatic events, but dispatchEvent is more reliable cross-browser)
-    var androidBrowserBtn = document.getElementById('android-browser-btn');
-    if (androidBrowserBtn) {
-      androidBrowserBtn.addEventListener('click', function () {
-        var activateBtn = document.getElementById('activate-btn');
-        if (activateBtn) {
-          activateBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-        }
-      });
-    }
+    // Android "try in browser" is now wired directly in app.js so the click
+    // event is trusted (isTrusted=true) — required for audio.play() on Android Chrome.
   </script>
   <script src="js/spells.js"></script>
   <script src="js/motion.js"></script>

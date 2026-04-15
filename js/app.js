@@ -59,6 +59,14 @@ window.addEventListener('DOMContentLoaded', () => {
   _el('voice-picker').addEventListener('change',   handleVoiceChange);
   _el('volume-slider').addEventListener('input',   handleVolumeChange);
   _el('test-btn').addEventListener('click',        onGestureDetected);
+
+  // Android "try in browser" — must be wired here so the click is a real trusted
+  // user gesture. dispatchEvent() creates isTrusted=false events which Android Chrome
+  // blocks for audio.play(), so the old inline-script workaround silently broke audio.
+  const androidBtn = document.getElementById('android-browser-btn');
+  if (androidBtn) {
+    androidBtn.addEventListener('click', handleActivate);
+  }
 });
 
 // ── Activate ─────────────────────────────────────────────────────────────────

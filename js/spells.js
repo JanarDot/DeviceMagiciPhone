@@ -5,7 +5,6 @@ const SPELLS = [
   { id: 'abracadabra',  name: 'Abracadabra!',                          female: ['abracadabra-female.mp3'],                       male: ['abracadabra-male.mp3'],                                weight: 4 },
   { id: 'alakazam',     name: 'Alakazam!',                             female: ['Alakazam-female.mp3'],                          male: ['Alakazam-male.mp3'],                                   weight: 4 },
   { id: 'hocus-pocus',  name: 'Hocus Pocus!',                          female: ['hocus-female.mp3'],                             male: ['Hocus-male.mp3'],                                      weight: 4 },
-  { id: 'open-sesame',  name: 'Open Sesame!',                          female: ['open-female.mp3'],                              male: ['open-male.mp3'],                                       weight: 4 },
   { id: 'presto',       name: 'Presto!',                               female: ['presto-female.mp3'],                            male: ['Presto-male.mp3'],                                     weight: 4 },
   { id: 'sim-sala-bim', name: 'Sim Sala Bim!',                         female: ['sim-female.mp3'],                               male: ['sim-male.mp3'],                                        weight: 4 },
   { id: 'bibbidi',      name: 'Bibbidi-Bobbidi-Boo!',                  female: ['bibbidi-female.mp3'],                           male: ['bibbidi-male.mp3'],                                    weight: 4 },
@@ -20,7 +19,6 @@ const SPELLS = [
   { id: 'riddikulus',   name: 'Riddikulus!',                           female: ['ridikulus-female.mp3'],                         male: ['riddikulus-male.mp3'],                                 weight: 4 },
   { id: 'stupefy',      name: 'Stupefy!',                              female: ['stupefy-female.mp3'],                           male: ['stupefy-male.mp3'],                                    weight: 4 },
   { id: 'hex',          name: 'Hex! Hex!',                             female: ['hex-female.mp3'],                               male: ['hex-male.mp3'],                                        weight: 4 },
-  { id: 'mirror',       name: 'Mirror, mirror on the wall!',           female: ['mirrow-female.mp3'],                            male: ['mirrow-male.mp3'],                                     weight: 4 },
   { id: 'muggle',       name: 'Start believing, you Muggle.',          female: ['believe-female.mp3'],                           male: ['start-male.mp3'],                                      weight: 1 },
 ];
 
